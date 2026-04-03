@@ -1,0 +1,229 @@
+# CUIMS Backend API
+**Cavendish University Internship Management System**
+
+Built with Node.js, Express.js, and MongoDB.
+
+---
+
+## Setup
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment
+cp .env .env.local
+# Edit MONGO_URI and JWT_SECRET as needed
+
+# 3. Seed the database with sample data
+node seed.js
+
+# 4. Start development server
+npm run dev
+
+# 5. Start production server
+npm start
+```
+
+Server runs on `http://localhost:5000`
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `PORT` | Server port | `5000` |
+| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/cuims` |
+| `JWT_SECRET` | Secret key for JWT signing | *(change in production)* |
+| `JWT_EXPIRES_IN` | Token expiry | `7d` |
+
+---
+
+## API Reference
+
+All protected routes require:
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### Auth  `/api/auth`
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/register` | Public | Register student or supervisor |
+| POST | `/login` | Public | Login and receive JWT |
+| GET | `/me` | Private | Get current user profile |
+| PUT | `/update-password` | Private | Change password |
+
+**Register body:**
+```json
+{
+  "name": "Allan Mukasa",
+  "email": "allan@students.cavendish.ac.ug",
+  "password": "securepass",
+  "role": "student",
+  "studentId": "CU2021/BSC/001",
+  "course": "BSc Computer Science",
+  "yearOfStudy": 3
+}
+```
+For supervisor, use `"role": "supervisor"` and include `organization`, `jobTitle`, `phone`.
+
+---
+
+### Internships  `/api/internships`
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/` | Public | List open internships (filter: `status`, `type`, `search`, `page`, `limit`) |
+| GET | `/:id` | Public | Get single internship details |
+| GET | `/my` | Supervisor | Get own internship listings |
+| POST | `/` | Supervisor | Create new internship |
+| PUT | `/:id` | Supervisor/Admin | Update internship |
+| DELETE | `/:id` | Supervisor/Admin | Delete internship |
+
+**Create internship body:**
+```json
+{
+  "title": "Software Engineering Intern",
+  "description": "...",
+  "company": "TechCorp Uganda",
+  "location": "Kampala",
+  "type": "hybrid",
+  "duration": "3 months",
+  "applicationDeadline": "2025-05-15",
+  "slots": 3,
+  "skills": ["JavaScript", "React"],
+  "stipend": "UGX 300,000/month"
+}
+```
+
+---
+
+### Applications  `/api/applications`
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/` | Student | Apply for internship (multipart/form-data with optional `resume` file) |
+| GET | `/my` | Student | Get own applications |
+| GET | `/my-interns` | Supervisor | Get all accepted interns across own internships |
+| GET | `/internship/:id` | Supervisor/Admin | Get all applicants for an internship |
+| PUT | `/:id/review` | Supervisor | Accept / reject / mark reviewing |
+| PUT | `/:id/withdraw` | Student | Withdraw a pending application |
+
+**Apply body (multipart/form-data):**
+```
+internshipId: <id>
+coverLetter: "I am very interested..."
+resume: <file> (optional, PDF/DOC/image, max 5MB)
+```
+
+**Review body:**
+```json
+{
+  "status": "accepted",
+  "supervisorNote": "Strong candidate, looking forward to working with you.",
+  "startDate": "2025-06-01",
+  "endDate": "2025-08-31"
+}
+```
+
+---
+
+### Reports  `/api/reports`
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/` | Student/Supervisor | Submit weekly report (multipart/form-data) |
+| GET | `/my` | Student/Supervisor | Get own submitted reports |
+| GET | `/supervisor-overview` | Supervisor | All reports for supervisor's internships |
+| GET | `/application/:id` | Student/Supervisor/Admin | Get all reports for an application (grouped by week) |
+| PUT | `/:id` | Report author | Edit own report |
+
+**Submit report body (multipart/form-data):**
+```
+applicationId: <id>
+weekNumber: 1
+title: "Week 1 Progress Report"
+activitiesCarriedOut: "..."   (student)
+skillsLearned: "..."          (student)
+challenges: "..."             (student)
+goalsForNextWeek: "..."       (student)
+studentPerformance: "..."     (supervisor)
+areasOfImprovement: "..."     (supervisor)
+overallFeedback: "..."        (supervisor)
+rating: 4                     (supervisor, 1-5)
+attachments: <files>          (up to 5 files)
+```
+
+---
+
+### Admin  `/api/admin`  *(Admin only)*
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/stats` | Platform-wide statistics |
+| GET | `/users` | All users (filter: `role`, `isApproved`, `search`, `page`) |
+| PUT | `/users/:id/approve` | Approve or revoke a supervisor |
+| PUT | `/users/:id` | Update any user |
+| DELETE | `/users/:id` | Delete a user |
+| GET | `/internships` | All internships regardless of status |
+| GET | `/applications` | All applications (filter: `status`) |
+| GET | `/reports` | All submitted reports |
+
+---
+
+### Users  `/api/users`
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| PUT | `/profile` | Private | Update own profile (multipart/form-data with optional `profilePhoto`) |
+| GET | `/:id` | Private | Get any user's profile |
+
+---
+
+## Roles & Permissions Summary
+
+| Action | Student | Supervisor | Admin |
+|---|---|---|---|
+| Browse internships | ✅ | ✅ | ✅ |
+| Apply for internship | ✅ | ❌ | ❌ |
+| Create internship | ❌ | ✅ (if approved) | ❌ |
+| Review applications | ❌ | ✅ (own) | ✅ |
+| Submit weekly report | ✅ (own) | ✅ (own interns) | ❌ |
+| View all users | ❌ | ❌ | ✅ |
+| Approve supervisors | ❌ | ❌ | ✅ |
+| Platform statistics | ❌ | ❌ | ✅ |
+
+---
+
+## File Uploads
+
+- Files are stored in the `uploads/` directory
+- Accessible at `http://localhost:5000/uploads/<filename>`
+- Allowed types: PDF, DOC, DOCX, PNG, JPG, JPEG
+- Max size: 5MB per file
+- Reports support up to 5 attachments
+
+---
+
+## Error Response Format
+
+```json
+{
+  "success": false,
+  "message": "Description of what went wrong"
+}
+```
+
+## Success Response Format
+
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```

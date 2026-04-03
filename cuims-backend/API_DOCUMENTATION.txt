@@ -1,0 +1,178 @@
+=========================================================
+      CUIMS API DOCUMENTATION & TESTING GUIDE
+=========================================================
+
+Base URL: http://localhost:5000/api
+
+---------------------------------------------------------
+1. HOW TO TEST THE API (Using Thunder Client VS Code Extension)
+---------------------------------------------------------
+A. Setting up Authentication (For protected routes)
+   1. Create a "New Request" and change GET to POST. Enter `/api/auth/login`.
+   2. Send your email/password in the Body -> JSON tab.
+   3. Copy the "token" string from the JSON response.
+   4. For all protected routes, go to the "Auth" tab under your request URL.
+   5. Choose "Bearer" from the dropdown and paste your token.
+
+B. Sending JSON Data (Standard Requests)
+   1. Go to the "Body" tab.
+   2. Select "JSON" from the sub-menu.
+   3. Write your JSON payload (e.g., {"email": "...", "password": "..."})
+
+C. Sending Files (Resumes, Photos, Attachments)
+   1. Go to the "Body" tab.
+   2. Select "Form" (this represents multipart/form-data).
+   3. VERY IMPORTANT: Check the "File" checkbox next to the field name.
+   4. Enter the required key name (e.g., "resume" or "attachments").
+   5. A "Choose File" button will appear in the value column. Click it to upload.
+
+
+---------------------------------------------------------
+2. AUTHENTICATION ROUTES (/api/auth)
+---------------------------------------------------------
+• POST /auth/register
+  => Registers a new user.
+  => Body (JSON): { "name", "email", "password", "role" (student/supervisor/admin), "studentId", "organization", "phone" }
+
+• POST /auth/login
+  => Authenticates and returns a JWT Bearer token.
+  => Body (JSON): { "email", "password" }
+
+• GET /auth/me
+  => Returns the currently logged in profile.
+  => Requires: Bearer Token
+
+• PUT /auth/update-password
+  => Updates the user's password.
+  => Requires: Bearer Token
+  => Body (JSON): { "currentPassword", "newPassword" }
+
+
+---------------------------------------------------------
+3. USERS ROUTES (/api/users)
+---------------------------------------------------------
+• PUT /users/profile
+  => Updates user profile information.
+  => Requires: Bearer Token
+  => Body (form-data if sending photo, otherwise JSON): 
+     [File] profilePhoto
+     [Text] name, phone, course, etc.
+
+• GET /users/:id
+  => Gets the public profile of a specific user.
+  => Requires: Bearer Token
+
+
+---------------------------------------------------------
+4. INTERNSHIPS ROUTES (/api/internships)
+---------------------------------------------------------
+• GET /internships
+  => Fetch all internships. (Public)
+
+• GET /internships/:id
+  => Get single internship details. (Public)
+
+• GET /internships/my
+  => Get all internships posted by the logged-in supervisor.
+  => Requires: Bearer Token (Supervisor)
+
+• POST /internships
+  => Create an internship posting.
+  => Requires: Bearer Token (Supervisor)
+  => Body (JSON): { "title", "company", "location", "description", "requirements", "duration" }
+
+• PUT /internships/:id
+  => Update an internship posting.
+  => Requires: Bearer Token (Supervisor/Admin)
+
+• DELETE /internships/:id
+  => Delete an internship.
+  => Requires: Bearer Token (Supervisor/Admin)
+
+
+---------------------------------------------------------
+5. APPLICATIONS ROUTES (/api/applications)
+---------------------------------------------------------
+• POST /applications
+  => Apply for an internship (Uploads Resume).
+  => Requires: Bearer Token (Student)
+  => Body (form-data):
+     [File] resume 
+     [Text] internshipId
+     [Text] coverLetter 
+
+• GET /applications/my
+  => Get all applications made by the student.
+  => Requires: Bearer Token (Student)
+
+• GET /applications/my-interns
+  => Get list of approved interns for the supervisor.
+  => Requires: Bearer Token (Supervisor)
+
+• GET /applications/internship/:internshipId
+  => Get all applications submitted to a specific internship.
+  => Requires: Bearer Token (Supervisor/Admin)
+
+• PUT /applications/:id/review
+  => Accept or reject a student's application.
+  => Requires: Bearer Token (Supervisor)
+  => Body (JSON): { "status": "accepted" / "rejected", "comments": "Optional feedback" }
+
+• PUT /applications/:id/withdraw
+  => Withdraw a pending application.
+  => Requires: Bearer Token (Student)
+
+
+---------------------------------------------------------
+6. REPORTS ROUTES (/api/reports)
+---------------------------------------------------------
+• POST /reports
+  => Submit a weekly report.
+  => Requires: Bearer Token (Student/Supervisor)
+  => Body (form-data):
+     [File] attachments (Up to 5 files allowed)
+     [Text] applicationId, weekNumber, title, activitiesCarriedOut, skillsLearned, challenges, goalsForNextWeek, etc.
+
+• GET /reports/my
+  => Get all reports authored by the logged-in user.
+  => Requires: Bearer Token
+
+• GET /reports/supervisor-overview
+  => Get a high-level overview of reports across all the supervisor's internships.
+  => Requires: Bearer Token (Supervisor)
+
+• GET /reports/application/:applicationId
+  => Get all weekly reports attached to a specific application/intern.
+  => Requires: Bearer Token
+
+• PUT /reports/:id
+  => Update an existing report.
+  => Requires: Bearer Token (Author only)
+  => Body (JSON): { ...fields to update... }
+
+
+---------------------------------------------------------
+7. ADMIN ROUTES (/api/admin)
+---------------------------------------------------------
+** ALL ROUTES REQUIRE BEARER TOKEN (Admin only) **
+
+• GET /admin/stats
+  => Gets summary counts for the dashboard.
+
+• GET /admin/users
+  => List all system users.
+
+• PUT /admin/users/:id/approve
+  => Approve an unverified supervisor account to allow them to post.
+
+• PUT /admin/users/:id
+  => Update a user's role or status.
+  => Body (JSON): { "role": "admin", "isActive": true }
+
+• DELETE /admin/users/:id
+  => Permanently delete a user from the system.
+
+• GET /admin/internships
+• GET /admin/applications
+• GET /admin/reports
+  => Fetches all platform-wide data for admin monitoring tables.

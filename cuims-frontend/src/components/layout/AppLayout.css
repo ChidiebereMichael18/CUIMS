@@ -1,0 +1,42 @@
+/* ── LAYOUT ─────────────────────────────────────────────────
+   Sidebar: position fixed on the left (always visible on desktop).
+   Main content: margin-left pushes it right of the sidebar.
+   Mobile: sidebar slides in as a drawer, margin-left is 0.
+───────────────────────────────────────────────────────────── */
+
+/* ── Main area: pushed right by sidebar width ─────────────── */
+.app-main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollable page content ─────────────────────────────── */
+.app-content {
+  flex: 1;
+  padding: 32px 36px;
+  background: var(--color-bg);
+}
+
+/* ── Mobile overlay backdrop ─────────────────────────────── */
+.sidebar-overlay-mobile {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+
+/* ── Mobile: remove margin, show overlay ─────────────────── */
+@media (max-width: 768px) {
+  .app-main {
+    margin-left: 0;
+  }
+  .sidebar-overlay-mobile {
+    display: block;
+  }
+  .app-content {
+    padding: 20px 16px;
+  }
+}

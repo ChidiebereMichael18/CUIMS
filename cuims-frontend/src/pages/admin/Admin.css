@@ -1,0 +1,118 @@
+/* ── Admin stats grid ────────────────────────────── */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-icon-blue   { background: var(--blue-50);              color: var(--blue-600); }
+.stat-icon-green  { background: var(--color-success-bg);     color: var(--color-success); }
+.stat-icon-amber  { background: var(--color-warning-bg);     color: var(--color-warning); }
+.stat-icon-red    { background: var(--color-danger-bg);      color: var(--color-danger); }
+.stat-sub {
+  font-size: 12px;
+  color: var(--color-text-subtle);
+  margin-top: 2px;
+}
+
+/* ── Alert banner ────────────────────────────────── */
+.admin-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #92400e;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Quick links ─────────────────────────────────── */
+.admin-quick-links { margin-top: 8px; }
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.quick-link-card {
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.quick-link-card:hover {
+  border-color: var(--blue-300);
+  box-shadow: var(--shadow-md);
+}
+.quick-link-icon  { font-size: 24px; margin-bottom: 4px; }
+.quick-link-title { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+.quick-link-desc  { font-size: 13px; color: var(--gray-500); line-height: 1.5; }
+
+/* ── Table avatar ────────────────────────────────── */
+.table-avatar {
+  width: 32px; height: 32px;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── Status chips ────────────────────────────────── */
+.status-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.status-chip {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 99px;
+  border: 1.5px solid var(--color-border);
+  color: var(--gray-600);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.status-chip:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+.status-chip.active {
+  background: var(--blue-600);
+  border-color: var(--blue-600);
+  color: #fff;
+}
+
+/* ── Filter bar (reuse from student but scoped here too) ── */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.filter-search { flex: 1; min-width: 200px; }
+.filter-select { width: 180px; }
+
+@media (max-width: 1024px) {
+  .admin-stats-grid  { grid-template-columns: 1fr 1fr; }
+  .quick-links-grid  { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .admin-stats-grid  { grid-template-columns: 1fr; }
+  .quick-links-grid  { grid-template-columns: 1fr; }
+}
