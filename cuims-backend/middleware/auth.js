@@ -13,7 +13,8 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'cuims-super-secret-key-123';
+    const decoded = jwt.verify(token, secret);
 
     // ── Hardcoded admin bypass (matches authController login bypass) ──
     if (decoded.id === 'admin-000000000000') {
