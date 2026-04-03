@@ -12,7 +12,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
+// Handle 401 globally ev
 api.interceptors.response.use(
   (res) => res,
   (err) => {
